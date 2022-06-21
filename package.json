@@ -78,6 +78,7 @@
     "cross-fetch": "^3.0.4",
     "date-fns": "^2.24.0",
     "isomorphic-fetch": "^3.0.0",
+    "lodash": "^4.17.21",
     "lodash.map": "^4.6.0",
     "lodash.snakecase": "^4.1.1"
   },
@@ -85,19 +86,13 @@
     "@azure/ms-rest-azure-js": "^2.0.0",
     "@azure/ms-rest-js": "^2.0.0"
   },
-  "peerDependencies": {
-    "@jupiterone/integration-sdk-core": "^7.1.0"
-  },
   "devDependencies": {
-    "@jupiterone/integration-sdk-core": "^8.3.2",
-    "@jupiterone/integration-sdk-dev-tools": "^8.3.2",
-    "@jupiterone/integration-sdk-testing": "^8.3.2",
     "@types/lodash.map": "^4.6.13",
     "@types/lodash.snakecase": "^4.1.6",
     "@types/node": "^13.11.1",
     "@types/uuid": "^8.3.0",
     "dotenv": "^8.2.0",
-    "ts-node": "^9.1.1",
+    "ts-node": "10.8.1",
     "uuid": "^8.3.2"
   }
 }
