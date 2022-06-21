@@ -168,6 +168,33 @@ export class DirectoryGraphClient extends GraphClient {
     });
   }
 
+  public async iterateUserMessages(
+    input: {
+      userId: string,
+      startDate: string,
+      endDate: string
+    },
+    callback: (user: User) => void | Promise<void>,
+  ): Promise<void> {
+    const resourceUrl = `/users/${input.userId}/messages?$select=id,bccRecipients,ccRecipients,conversationId,conversationIndex,from,hasAttachments,receivedDateTime,replyTo,sender,subject,toRecipients&$top=300&$filter=receivedDateTime le ${input.endDate} and receivedDateTime ge ${input.startDate}`;
+    this.logger.info({ userId: input.userId }, 'Iterating user messages.');
+
+    return this.iterateResources({
+      resourceUrl,
+      callback,
+    });
+  }
+
+  public async listAttachments(
+    userId: string,
+    messageId: String
+  ) {
+    let api = this.client.api(`/users/${userId}/messages/${messageId}/attachments`);
+    api = api.select(["contentType", "isInline", "lastModifiedDateTime", "name", "size"])
+    const response:any = await this.request(api);
+    return response.value || []
+  }
+
   // https://docs.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http
   public async iterateUsers(
     callback: (user: User) => void | Promise<void>,
@@ -230,6 +257,7 @@ export class DirectoryGraphClient extends GraphClient {
       const response = await this.request<IterableGraphResponse<T>>(api);
       if (response) {
         nextLink = response['@odata.nextLink'];
+        console.log(response['@odata.nextLink'])
         for (const value of response.value) {
           try {
             await callback(value);
