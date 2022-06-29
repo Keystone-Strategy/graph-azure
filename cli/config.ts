@@ -4,7 +4,7 @@ import path from 'path';
 import {
   IntegrationError,
   IntegrationInvocationConfig,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 
 import * as log from './log';
 

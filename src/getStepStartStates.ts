@@ -2,7 +2,7 @@ import {
   IntegrationExecutionContext,
   StepStartStates,
   StepStartState,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 
 import { IntegrationConfig } from './types';
 

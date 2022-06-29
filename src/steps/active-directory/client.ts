@@ -1,4 +1,4 @@
-import { IntegrationProviderAPIError } from '@jupiterone/integration-sdk-core';
+import { IntegrationProviderAPIError } from '@keystone-labs/integration-sdk-core';
 import {
   DirectoryObject,
   DirectoryRole,

@@ -10,7 +10,7 @@ import {
 import {
   IntegrationLogger,
   IntegrationProviderAPIError,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 import { retry } from '@lifeomic/attempt';
 import { FetchError } from 'node-fetch';
 

@@ -1,4 +1,4 @@
-import { IntegrationExecutionContext, IntegrationInvocationConfig, StepStartStates } from '@jupiterone/integration-sdk-core';
+import { IntegrationExecutionContext, IntegrationInvocationConfig, StepStartStates } from '@keystone-labs/integration-sdk-core';
 
 import { GraphClient } from './azure/graph/client';
 

@@ -1,7 +1,7 @@
 import {
   IntegrationExecutionContext,
   IntegrationValidationError,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 
 import { DirectoryGraphClient } from './steps/active-directory/client';
 import { IntegrationConfig } from './types';

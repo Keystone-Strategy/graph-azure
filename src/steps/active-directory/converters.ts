@@ -2,7 +2,7 @@
 import {
   createIntegrationEntity,
   Entity,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 
 import { generateEntityKey } from '../../utils/generateKeys';
 

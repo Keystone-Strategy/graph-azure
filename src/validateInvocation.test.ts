@@ -1,7 +1,7 @@
 import {
   IntegrationValidationError,
   shouldReportErrorToOperator,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 import { createMockExecutionContext } from '@jupiterone/integration-sdk-testing';
 
 import { IntegrationConfig } from './types';

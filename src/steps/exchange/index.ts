@@ -4,8 +4,8 @@ import {
     RelationshipClass,
     IntegrationValidationError,
     StepStartStates
-  } from '@jupiterone/integration-sdk-core';
-  import { IntegrationExecutionContext, IntegrationInvocationConfig } from '@jupiterone/integration-sdk-core';
+  } from '@keystone-labs/integration-sdk-core';
+  import { IntegrationExecutionContext, IntegrationInvocationConfig } from '@keystone-labs/integration-sdk-core';
   import { DirectoryGraphClient } from '../active-directory/client';
 
   import { IntegrationConfig } from '../../types';
