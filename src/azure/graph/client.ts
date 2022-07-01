@@ -5,6 +5,7 @@ import {
   IntegrationValidationError,
 } from '@jupiterone/integration-sdk-core';
 import { FetchError } from 'node-fetch';
+import "isomorphic-fetch";
 import {
   AuthenticationProvider,
   Client,
@@ -115,7 +116,7 @@ export abstract class GraphClient {
       },
       {
         maxAttempts: 3,
-        delay: 200,
+        delay: 2000,
         handleError: (err, context, options) => {
           const endpoint = (graphRequest as any).buildFullUrl?.();
           this.logger.info(
