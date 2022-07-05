@@ -3,7 +3,7 @@ name: Build image and deploy to ECR
 on:
  
   push:
-    branches: [ main ]
+    branches: [ main, feature/dockerize-integration ]
 
 jobs:
   
