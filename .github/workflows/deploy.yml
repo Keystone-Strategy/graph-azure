@@ -32,7 +32,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
-        IMAGE_TAG: $(date +%s)
+        IMAGE_TAG: 1.0.1
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . --build-arg NPM_ACCESS_TOKEN=${{ secrets.NPM_ACCESS_TOKEN }}
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
