@@ -1,4 +1,4 @@
-import { IntegrationValidationError } from '@jupiterone/integration-sdk-core';
+import { IntegrationValidationError } from '@keystone-labs/integration-sdk-core';
 import { Recording } from '@jupiterone/integration-sdk-testing';
 
 import config from '../../../test/integrationInstanceConfig';

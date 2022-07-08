@@ -1,7 +1,7 @@
 import * as log from '../log';
 import * as path from 'path';
 import { createCommand } from 'commander';
-import { StepRelationshipMetadata } from '@jupiterone/integration-sdk-core';
+import { StepRelationshipMetadata } from '@keystone-labs/integration-sdk-core';
 import { promises as fs } from 'fs';
 import { MonitorRelationships } from '../../src/steps/resource-manager/monitor/constants';
 import { loadConfig } from '../config';

@@ -9,3 +9,7 @@ yarn-error.log
 *.tfstate
 .vscode
 .eslintcache
+
+# This next line is added due to the integration dynamically creates this __recordings__ folder
+# when its running.
+__recordings__/

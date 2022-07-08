@@ -1,4 +1,4 @@
-import { JobState } from '@jupiterone/integration-sdk-core';
+import { JobState } from '@keystone-labs/integration-sdk-core';
 import { getAccountEntity } from '../steps/active-directory';
 import { AzureWebLinker } from './types';
 

@@ -3,7 +3,7 @@ import {
   IntegrationProviderAPIError,
   IntegrationProviderAuthorizationError,
   IntegrationValidationError,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 import { FetchError } from 'node-fetch';
 import "isomorphic-fetch";
 import {

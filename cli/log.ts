@@ -1,12 +1,12 @@
 import chalk from 'chalk';
 
-import { ExecuteIntegrationResult } from '@jupiterone/integration-sdk-runtime';
+import { ExecuteIntegrationResult } from '@keystone-labs/integration-sdk-runtime';
 import {
   IntegrationStepResult,
   StepResultStatus,
   SynchronizationJob,
   Metric,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 
 export function debug(msg: string) {
   console.log(`${chalk.gray(msg)}`);

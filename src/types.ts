@@ -1,7 +1,7 @@
 import {
   IntegrationInstanceConfig,
   IntegrationStepExecutionContext,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 
 export type IntegrationStepContext = IntegrationStepExecutionContext<
   IntegrationConfig

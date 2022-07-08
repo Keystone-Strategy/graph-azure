@@ -3,7 +3,7 @@ import fetch from 'cross-fetch';
 import {
   IntegrationProviderAPIError,
   IntegrationValidationError,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 
 import { IntegrationConfig } from '../../types';
 import { isJson } from '../../utils/isJson';

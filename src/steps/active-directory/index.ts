@@ -6,7 +6,7 @@ import {
   JobState,
   IntegrationError,
   createDirectRelationship,
-} from '@jupiterone/integration-sdk-core';
+} from '@keystone-labs/integration-sdk-core';
 
 import { IntegrationStepContext, IntegrationConfig } from '../../types';
 import {

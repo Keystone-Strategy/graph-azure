@@ -5,7 +5,7 @@ import {
     Entity,
     JobState,
     Relationship,
-  } from '@jupiterone/integration-sdk-core';
+  } from '@keystone-labs/integration-sdk-core';
 import { IntegrationStepContext } from '../../../types';
 import {
     createMessageEntity,

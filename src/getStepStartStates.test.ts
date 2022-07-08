@@ -113,7 +113,7 @@ import { MonitorSteps } from './steps/resource-manager/monitor/constants';
 import { AppServiceSteps } from './steps/resource-manager/appservice/constants';
 import { PolicyInsightSteps } from './steps/resource-manager/policy-insights/constants';
 import { ManagementGroupSteps } from './steps/resource-manager/management-groups/constants';
-import { Step } from '@jupiterone/integration-sdk-core';
+import { Step } from '@keystone-labs/integration-sdk-core';
 import { STEP_RM_CONTAINER_SERVICES_CLUSTERS } from './steps/resource-manager/container-services/constants';
 
 describe('getStepStartStates', () => {

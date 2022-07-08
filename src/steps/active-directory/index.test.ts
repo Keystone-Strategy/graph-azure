@@ -28,7 +28,7 @@ import {
   USER_ENTITY_TYPE,
 } from './constants';
 import { getMockAccountEntity } from '../../../test/helpers/getMockEntity';
-import { IntegrationProviderAuthorizationError } from '@jupiterone/integration-sdk-core';
+import { IntegrationProviderAuthorizationError } from '@keystone-labs/integration-sdk-core';
 
 let recording: Recording;
 
