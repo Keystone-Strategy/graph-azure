@@ -619,12 +619,12 @@
     ajv "^8.0.0"
     ajv-formats "^2.0.0"
 
-"@keystone-labs/integration-sdk-cli@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@keystone-labs/integration-sdk-cli/-/integration-sdk-cli-1.0.0.tgz#a8b67d2f8874ce24d4bf049aa16442f422fee7f3"
-  integrity sha512-EZCFhgNCcvlzW6byQ2xWVkPvbfLGKLnioEIwVx8o4IB+3J654MNgXTpZCZjjtiiGktS5yuDBaVt5badDwnfQAA==
+"@keystone-labs/integration-sdk-cli@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@keystone-labs/integration-sdk-cli/-/integration-sdk-cli-1.0.1.tgz#418b5f627d86491774f2f3e102631514b37ff68f"
+  integrity sha512-3Olhgi+nwIRE2irDAPYX6TKoe39JwiQOQDeWPheNN74GUjXeo5mPw1NMw7E2jC/sn0DCUfpxyGcNmmIA8JGAJQ==
   dependencies:
-    "@keystone-labs/integration-sdk-runtime" "1.0.0"
+    "@keystone-labs/integration-sdk-runtime" "1.1.0"
     aws-sdk "^2.1091.0"
     chalk "^4"
     commander "^5.0.0"
@@ -651,10 +651,10 @@
     typescript "4.6.2"
     uuid "^8.3.2"
 
-"@keystone-labs/integration-sdk-runtime@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@keystone-labs/integration-sdk-runtime/-/integration-sdk-runtime-1.0.0.tgz#0c15d357e679d8c9e4b9a7563c9468dd48c2f081"
-  integrity sha512-LSnVmZUmVJJWn+KTodnzZlUzcaBooKvO5PoW/2BOIM9aN3CfDKpvzoM63abecMP2U1LNGcDmD7rodhFF1hiQLg==
+"@keystone-labs/integration-sdk-runtime@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@keystone-labs/integration-sdk-runtime/-/integration-sdk-runtime-1.1.0.tgz#a7ee07c805db6e1e79d19577af163dfa983c0444"
+  integrity sha512-8IzGg5ftM+aAd3zAfjQZNhl4Hb9oW41gtgjSSa+Yt4c32l5cb/iHCjbUy037X8VLpp6Zx/PYOqO0FARCS9ED9w==
   dependencies:
     "@keystone-labs/integration-sdk-core" "1.0.0"
     "@lifeomic/alpha" "^1.4.0"
