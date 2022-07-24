@@ -641,7 +641,7 @@
     upath "^1.2.0"
     vis "^4.21.0-EOL"
 
-"@keystone-labs/integration-sdk-core@1.0.0":
+"@keystone-labs/integration-sdk-core@1.0.0", "@keystone-labs/integration-sdk-core@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@keystone-labs/integration-sdk-core/-/integration-sdk-core-1.0.0.tgz#f1c8973350af9240361921d6e0b70329f398ec3d"
   integrity sha512-8ots2K4HP138MdpFsZPqVsCIhpFjcT343E2XfwLg/Hh+TkuD0OGnYjk6THppzA6O46lqzeCs1stwU5sX1xKZ2g==
@@ -651,7 +651,7 @@
     typescript "4.6.2"
     uuid "^8.3.2"
 
-"@keystone-labs/integration-sdk-runtime@1.1.0":
+"@keystone-labs/integration-sdk-runtime@1.1.0", "@keystone-labs/integration-sdk-runtime@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@keystone-labs/integration-sdk-runtime/-/integration-sdk-runtime-1.1.0.tgz#a7ee07c805db6e1e79d19577af163dfa983c0444"
   integrity sha512-8IzGg5ftM+aAd3zAfjQZNhl4Hb9oW41gtgjSSa+Yt4c32l5cb/iHCjbUy037X8VLpp6Zx/PYOqO0FARCS9ED9w==
