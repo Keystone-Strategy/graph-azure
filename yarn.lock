@@ -646,9 +646,9 @@
     uuid "^8.3.2"
 
 "@keystone-labs/integration-sdk-runtime@^1.1.0", "@keystone-labs/integration-sdk-runtime@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@keystone-labs/integration-sdk-runtime/-/integration-sdk-runtime-1.1.1.tgz#26241ba58efc1bc62bedf9cdc00febafa4111068"
-  integrity sha512-7qE4U7oA1C5dEO97RFTVl260ApHT/GSDJt1d8Mm2DrHApkyv2QSbi5VVR/u+OLtT97IpiITOL/7abwAoXVZ/iQ==
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@keystone-labs/integration-sdk-runtime/-/integration-sdk-runtime-1.1.2.tgz#1aabb8b7f21af2cc2cf28670561676cbd5b80fa9"
+  integrity sha512-XRfP3gh9vLEm6PMufyI/VGhnSN/qS2va1jNnPQjKCmYilz52SS6jQI/v1rIN9yrWRk3mqfm5PElVuSrWNsfEeg==
   dependencies:
     "@keystone-labs/integration-sdk-core" "^1.0.0"
     "@lifeomic/alpha" "^1.4.0"
