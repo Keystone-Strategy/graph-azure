@@ -74,7 +74,7 @@
     "@azure/storage-queue": "^12.4.0",
     "@keystone-labs/integration-sdk-cli": "^1.0.1",
     "@keystone-labs/integration-sdk-core": "^1.0.0",
-    "@keystone-labs/integration-sdk-runtime": "^1.1.4",
+    "@keystone-labs/integration-sdk-runtime": "^1.1.5",
     "@lifeomic/attempt": "^3.0.0",
     "@microsoft/microsoft-graph-client": "^3.0.2",
     "@microsoft/microsoft-graph-types": "^1.10.0",
