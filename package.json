@@ -1,6 +1,6 @@
 {
   "name": "@keystone-labs/graph-azure",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A graph conversion tool for https://azure.microsoft.com/.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
