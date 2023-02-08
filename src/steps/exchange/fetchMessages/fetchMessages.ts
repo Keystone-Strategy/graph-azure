@@ -134,11 +134,18 @@ export default async function fetchMessages(
 }
 
 /**
- * A person dict as it comes from Microsoft.
+ * An email address dict as it comes from Microsoft.
  */
 interface MSEmailAddress {
-  address: string;
-  name: string;
+  readonly address: string;
+  readonly name: string;
+}
+
+/**
+ * A person dict as it comes from Microsoft.
+ */
+interface MSPerson {
+  readonly emailAddress: MSEmailAddress;
 }
 
 /**
@@ -305,7 +312,7 @@ const processSender = (message: { from: MSEmailAddress }, messageEntity) => {
 };
 
 const processRecipients = (
-  message: { toRecipients: readonly MSEmailAddress[] },
+  message: { toRecipients: readonly MSPerson[] },
   messageEntity: Entity,
   recipientType: 'to' | 'cc',
 ) => {
@@ -315,8 +322,9 @@ const processRecipients = (
   const emailAddressBelongsToDomainRelationships: ExplicitRelationship[] = [];
 
   for (const toEmailRecipient of message.toRecipients) {
-    const foundAddresses =
-      getAddressAndNameFromMSEmailAddress(toEmailRecipient);
+    const foundAddresses = getAddressAndNameFromMSEmailAddress(
+      toEmailRecipient.emailAddress,
+    );
 
     if (foundAddresses.length === 0) continue;
 
