@@ -71,15 +71,16 @@ export default async function fetchMessages(
         messageSentToEmailAddressRelationships,
         emailAddressBelongsToDomainRelationships:
           emailAddressBelongsToDomainRelationshipsFromRecipients,
-      }: any = processRecipients(message, messageEntity);
+      }: any = processRecipients(message, messageEntity, 'to');
 
       const {
-        ccEmailAddressEntities,
-        ccDomainEntities,
-        messageSentCCEmailAddressRelationships,
+        toEmailAddressEntities: ccEmailAddressEntities,
+        toDomainEntities: ccDomainEntities,
+        messageSentToEmailAddressRelationships:
+          messageSentCCEmailAddressRelationships,
         emailAddressBelongsToDomainRelationships:
           emailAddressBelongsToDomainRelationshipsFromCCs,
-      } = processCCs(message, messageEntity);
+      } = processRecipients(message, messageEntity, 'cc');
 
       const entities: Entity[] = [];
       entities.push(messageEntity);
@@ -204,7 +205,7 @@ const processSender = (message: { from: MSEmailAddress }, messageEntity) => {
   };
 };
 
-const processRecipients = (message, messageEntity) => {
+const processRecipients = (message, messageEntity, type: 'to' | 'cc') => {
   const toEmailAddressEntities: any = [];
   const toDomainEntities: any = [];
   const messageSentToEmailAddressRelationships: any = [];
@@ -248,7 +249,8 @@ const processRecipients = (message, messageEntity) => {
     const messageSentToEmailAddressRelationship = createDirectRelationship({
       fromKey: messageEntity._key,
       fromType: MESSAGE_ENTITY_TYPE,
-      _type: RelationshipClass.SENT_TO,
+      _type:
+        type === 'cc' ? RelationshipClass.CC_TO : RelationshipClass.SENT_TO,
       toKey: toEmailAddressEntity._key,
       toType: EMAIL_ADDRESS_ENTITY_TYPE,
     });
@@ -268,74 +270,6 @@ const processRecipients = (message, messageEntity) => {
     toEmailAddressEntities,
     toDomainEntities,
     messageSentToEmailAddressRelationships,
-    emailAddressBelongsToDomainRelationships,
-  };
-};
-
-const processCCs = (message, messageEntity) => {
-  const ccEmailAddressEntities: any = [];
-  const ccDomainEntities: any = [];
-  const messageSentCCEmailAddressRelationships: any = [];
-  const emailAddressBelongsToDomainRelationships: any = [];
-
-  for (const ccEmailRecipient of message.ccRecipients) {
-    const ccEmailAddressAddress = _.get(
-      ccEmailRecipient,
-      'emailAddress.address',
-      null,
-    );
-
-    if (!ccEmailAddressAddress) continue;
-
-    const ccEmailAddressName = _.get(
-      ccEmailRecipient,
-      'emailAddress.name',
-      'NOT DEFINED',
-    );
-    const ccEmailAddressEntity = createEmailAddressEntity(
-      ccEmailAddressAddress,
-      ccEmailAddressName,
-    );
-
-    const ccDomain = getDomainFromEmailAddress(ccEmailAddressAddress);
-    const ccDomainEntity =
-      ccDomain !== null ? createDomainEntity(ccDomain) : null;
-
-    const emailAddressBelongsToDomainRelationship =
-      ccDomainEntity !== null
-        ? createDirectRelationship({
-            fromKey: ccEmailAddressEntity._key,
-            fromType: EMAIL_ADDRESS_ENTITY_TYPE,
-            _type: RelationshipClass.BELONGS_TO,
-            toKey: ccDomainEntity._key,
-            toType: DOMAIN_ENTITY_TYPE,
-          })
-        : null;
-
-    // MESSAGE_SENT_TO_EMAIL_ADDRESS_RELATIONSHIP
-    const messageSentCCEmailAddressRelationship = createDirectRelationship({
-      fromKey: messageEntity._key,
-      fromType: MESSAGE_ENTITY_TYPE,
-      _type: RelationshipClass.CC_TO,
-      toKey: ccEmailAddressEntity._key,
-      toType: EMAIL_ADDRESS_ENTITY_TYPE,
-    });
-
-    ccEmailAddressEntities.push(ccEmailAddressEntity);
-    if (ccDomainEntity !== null) ccDomainEntities.push(ccDomainEntity);
-    messageSentCCEmailAddressRelationships.push(
-      messageSentCCEmailAddressRelationship,
-    );
-    if (emailAddressBelongsToDomainRelationship !== null)
-      emailAddressBelongsToDomainRelationships.push(
-        emailAddressBelongsToDomainRelationship,
-      );
-  }
-
-  return {
-    ccEmailAddressEntities,
-    ccDomainEntities,
-    messageSentCCEmailAddressRelationships,
     emailAddressBelongsToDomainRelationships,
   };
 };
