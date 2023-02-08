@@ -1,10 +1,11 @@
 import {
+  ExplicitRelationship,
   RelationshipClass,
   createDirectRelationship,
   Entity,
   JobState,
-  Relationship,
 } from '@keystone-labs/integration-sdk-core';
+
 import { IntegrationStepContext } from '../../../types';
 import {
   createMessageEntity,
@@ -80,7 +81,7 @@ export default async function fetchMessages(
           emailAddressBelongsToDomainRelationshipsFromCCs,
       } = processCCs(message, messageEntity);
 
-      const entities: any = [];
+      const entities: Entity[] = [];
       entities.push(messageEntity);
       entities.push(conversationEntity);
       if (fromEmailAddressEntity !== null)
@@ -91,7 +92,7 @@ export default async function fetchMessages(
       entities.push(...ccEmailAddressEntities);
       entities.push(...ccDomainEntities);
 
-      const relationships: any = [];
+      const relationships: ExplicitRelationship[] = [];
       relationships.push(messageBelongsToConversationRelationship);
       if (messageSentFromEmailAddressRelationship !== null)
         relationships.push(messageSentFromEmailAddressRelationship);
@@ -335,7 +336,7 @@ const processCCs = (message, messageEntity) => {
 const storeEntities = async (entities, jobState: JobState) => {
   const uniqueEntities = _.uniqBy(entities, (e: Entity) => e._key);
 
-  const newEntities: any = [];
+  const newEntities: Entity[] = [];
   for (const entity of uniqueEntities) {
     const existingEntity = await jobState.hasKey(entity._key);
     if (!existingEntity) newEntities.push(entity);
@@ -347,10 +348,10 @@ const storeEntities = async (entities, jobState: JobState) => {
 const storeRelationships = async (relationships, jobState: JobState) => {
   const uniqueRelationships = _.uniqBy(
     relationships,
-    (r: Relationship) => r._key,
+    (r: ExplicitRelationship) => r._key,
   );
 
-  const newRelationships: any = [];
+  const newRelationships: ExplicitRelationship[] = [];
   for (const relationship of uniqueRelationships) {
     const existingRelationship = await jobState.hasKey(relationship._key);
     if (!existingRelationship) newRelationships.push(relationship);
