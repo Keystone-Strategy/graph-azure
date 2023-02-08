@@ -125,15 +125,14 @@ export default async function fetchMessages(
           toType: ATTACHMENT_ENTITY_TYPE,
         });
         await storeEntities([attachmentEntity], jobState);
-        await storeRelationships([attachmentReationship], jobState);
+        await storeRelationships([attachmentRelationship], jobState);
       }
     },
   );
 }
 
-const getDomainFromEmailAddress = (address) => {
+const getDomainFromEmailAddress = (address: string): string => {
   const afterAt = address.split('@')[1];
-  if (afterAt === undefined) return null;
   const splitDot = afterAt.split('.');
   const domain = `${splitDot[splitDot.length - 2]}.${
     splitDot[splitDot.length - 1]
