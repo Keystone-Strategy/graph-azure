@@ -117,7 +117,7 @@ export default async function fetchMessages(
 
       for (const attachment of attachments) {
         const attachmentEntity = createAttachmentEntity(attachment);
-        const attachmentReationship = createDirectRelationship({
+        const attachmentRelationship = createDirectRelationship({
           fromKey: messageEntity._key,
           fromType: MESSAGE_ENTITY_TYPE,
           _type: RelationshipClass.CONTAINS,
