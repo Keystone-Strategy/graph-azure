@@ -131,6 +131,14 @@ export default async function fetchMessages(
   );
 }
 
+/**
+ * A person dict as it comes from Microsoft.
+ */
+interface MSEmailAddress {
+  address: string;
+  name: string;
+}
+
 const getDomainFromEmailAddress = (address: string): string => {
   const afterAt = address.split('@')[1];
   const splitDot = afterAt.split('.');
@@ -140,7 +148,7 @@ const getDomainFromEmailAddress = (address: string): string => {
   return domain.toLowerCase();
 };
 
-const processSender = (message, messageEntity) => {
+const processSender = (message: { from: MSEmailAddress }, messageEntity) => {
   const fromEmailAddressAddress = _.get(
     message,
     'from.emailAddress.address',
