@@ -255,13 +255,13 @@ const getDomainFromEmailAddress = (address: string): string => {
   return domain.toLowerCase();
 };
 
-const processSender = (message: { from: MSEmailAddress }, messageEntity) => {
-  const fromEmailAddressAddress = _.get(
-    message,
-    'from.emailAddress.address',
-    null,
+const processSender = (message: { from: MSPerson }, messageEntity: Entity) => {
+  const foundAddresses = getAddressAndNameFromMSEmailAddress(
+    message.from.emailAddress,
   );
-  if (fromEmailAddressAddress === null) {
+
+  if (foundAddresses.length != 1) {
+    console.log(`Could not process sender for message: `, message);
     return {
       fromEmailAddressEntity: null,
       fromDomainEntity: null,
@@ -269,30 +269,24 @@ const processSender = (message: { from: MSEmailAddress }, messageEntity) => {
       emailAddressBelongsToDomainRelationship: null,
     };
   }
-  const fromEmailAddressName = _.get(
-    message,
-    'from.emailAddress.name',
-    'NOT DEFINED',
-  );
+
+  const [foundAddress] = foundAddresses;
+
   const fromEmailAddressEntity = createEmailAddressEntity(
-    fromEmailAddressAddress,
-    fromEmailAddressName,
+    foundAddress.address,
+    foundAddress.name,
   );
 
-  const fromDomain = getDomainFromEmailAddress(fromEmailAddressAddress);
-  const fromDomainEntity =
-    fromDomain !== null ? createDomainEntity(fromDomain) : null;
+  const fromDomain = getDomainFromEmailAddress(foundAddress.address);
+  const fromDomainEntity = createDomainEntity(fromDomain);
 
-  const emailAddressBelongsToDomainRelationship =
-    fromDomainEntity !== null
-      ? createDirectRelationship({
-          fromKey: fromEmailAddressEntity._key,
-          fromType: EMAIL_ADDRESS_ENTITY_TYPE,
-          _type: RelationshipClass.BELONGS_TO,
-          toKey: fromDomainEntity._key,
-          toType: DOMAIN_ENTITY_TYPE,
-        })
-      : null;
+  const emailAddressBelongsToDomainRelationship = createDirectRelationship({
+    fromKey: fromEmailAddressEntity._key,
+    fromType: EMAIL_ADDRESS_ENTITY_TYPE,
+    _type: RelationshipClass.BELONGS_TO,
+    toKey: fromDomainEntity._key,
+    toType: DOMAIN_ENTITY_TYPE,
+  });
 
   // MESSAGE_SENT_FROM_EMAIL_ADDRESS_RELATIONSHIP
   const messageSentFromEmailAddressRelationship = createDirectRelationship({
