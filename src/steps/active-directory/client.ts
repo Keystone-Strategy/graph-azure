@@ -257,7 +257,8 @@ export class DirectoryGraphClient extends GraphClient {
       const response = await this.request<IterableGraphResponse<T>>(api);
       if (response) {
         nextLink = response['@odata.nextLink'];
-        console.log(response['@odata.nextLink'])
+        // eslint-disable-next-line no-console
+        console.log(response['@odata.nextLink']);
         for (const value of response.value) {
           try {
             await callback(value);

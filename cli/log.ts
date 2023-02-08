@@ -9,18 +9,22 @@ import {
 } from '@keystone-labs/integration-sdk-core';
 
 export function debug(msg: string) {
+  // eslint-disable-next-line no-console
   console.log(`${chalk.gray(msg)}`);
 }
 
 export function info(msg: string) {
+  // eslint-disable-next-line no-console
   console.log(`${chalk.white(msg)}`);
 }
 
 export function warn(msg: string) {
+  // eslint-disable-next-line no-console
   console.log(`${chalk.yellow(msg)}`);
 }
 
 export function error(msg: string) {
+  // eslint-disable-next-line no-console
   console.log(`${chalk.red(msg)}`);
 }
 
@@ -57,6 +61,7 @@ export function displayExecutionResults(results: ExecuteIntegrationResult) {
           `The following types were encountered but are not declared in the step's "types" field:${undeclaredTypesList}`,
         );
 
+        // eslint-disable-next-line no-console
         console.log('');
       }
     }
@@ -94,6 +99,7 @@ function logStepStatus(stepResult: IntegrationStepResult) {
     `Step "${chalk.cyan(stepResult.id)}" completed with status:`,
   );
   const statusText = getStepStatusText(stepResult.status);
+  // eslint-disable-next-line no-console
   console.log(`${stepPrefix} ${statusText}`);
 }
 
