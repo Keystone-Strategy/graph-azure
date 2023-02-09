@@ -1,10 +1,12 @@
 import {
+  ExplicitRelationship,
   RelationshipClass,
   createDirectRelationship,
   Entity,
   JobState,
-  Relationship,
 } from '@keystone-labs/integration-sdk-core';
+import { uniq, zip } from 'lodash';
+
 import { IntegrationStepContext } from '../../../types';
 import {
   createMessageEntity,
@@ -70,17 +72,18 @@ export default async function fetchMessages(
         messageSentToEmailAddressRelationships,
         emailAddressBelongsToDomainRelationships:
           emailAddressBelongsToDomainRelationshipsFromRecipients,
-      }: any = processRecipients(message, messageEntity);
+      }: any = processRecipients(message, messageEntity, 'to');
 
       const {
-        ccEmailAddressEntities,
-        ccDomainEntities,
-        messageSentCCEmailAddressRelationships,
+        toEmailAddressEntities: ccEmailAddressEntities,
+        toDomainEntities: ccDomainEntities,
+        messageSentToEmailAddressRelationships:
+          messageSentCCEmailAddressRelationships,
         emailAddressBelongsToDomainRelationships:
           emailAddressBelongsToDomainRelationshipsFromCCs,
-      } = processCCs(message, messageEntity);
+      } = processRecipients(message, messageEntity, 'cc');
 
-      const entities: any = [];
+      const entities: Entity[] = [];
       entities.push(messageEntity);
       entities.push(conversationEntity);
       if (fromEmailAddressEntity !== null)
@@ -91,7 +94,7 @@ export default async function fetchMessages(
       entities.push(...ccEmailAddressEntities);
       entities.push(...ccDomainEntities);
 
-      const relationships: any = [];
+      const relationships: ExplicitRelationship[] = [];
       relationships.push(messageBelongsToConversationRelationship);
       if (messageSentFromEmailAddressRelationship !== null)
         relationships.push(messageSentFromEmailAddressRelationship);
@@ -116,7 +119,7 @@ export default async function fetchMessages(
 
       for (const attachment of attachments) {
         const attachmentEntity = createAttachmentEntity(attachment);
-        const attachmentReationship = createDirectRelationship({
+        const attachmentRelationship = createDirectRelationship({
           fromKey: messageEntity._key,
           fromType: MESSAGE_ENTITY_TYPE,
           _type: RelationshipClass.CONTAINS,
@@ -124,15 +127,127 @@ export default async function fetchMessages(
           toType: ATTACHMENT_ENTITY_TYPE,
         });
         await storeEntities([attachmentEntity], jobState);
-        await storeRelationships([attachmentReationship], jobState);
+        await storeRelationships([attachmentRelationship], jobState);
       }
     },
   );
 }
 
-const getDomainFromEmailAddress = (address) => {
+/**
+ * An email address dict as it comes from Microsoft.
+ */
+interface MSEmailAddress {
+  readonly address: string;
+  readonly name: string;
+}
+
+/**
+ * A person dict as it comes from Microsoft.
+ */
+interface MSPerson {
+  readonly emailAddress: MSEmailAddress;
+}
+
+/**
+ * Person dicts sometimes come mangled from Microsoft, e.g.:
+ * ```json
+ * {
+      "name": "\" <lcohen@ihcis.com>,  \"@hbs.edu",
+      "address": "\" <lcohen@ihcis.com>,  \"@hbs.edu"
+    }
+ * ```
+ * This function shall extract the relevant email addresses from it.
+ */
+const getAddressAndNameFromMSEmailAddress = ({
+  address,
+  name,
+}: MSEmailAddress): readonly MSEmailAddress[] => {
+  const addressesFound: MSEmailAddress[] = [];
+  /**
+   * This regex matches all emails but will also include leading `'`s and such,
+   * as those characters are actually valid characters for an email address,
+   */
+  const regexp =
+    /(?:[a-z0-9+!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/gi;
+
+  const addressesInAddress = address.match(regexp);
+  const addressesInName = name.match(regexp);
+
+  // No way of knowing the name for each person, set address as name
+  if (addressesInAddress && addressesInName) {
+    addressesFound.push(
+      ...addressesInName.map(
+        (foundAddress): MSEmailAddress => ({
+          address: foundAddress,
+          name: foundAddress,
+        }),
+      ),
+    );
+    addressesFound.push(
+      ...addressesInAddress.map(
+        (foundAddress): MSEmailAddress => ({
+          address: foundAddress,
+          name: foundAddress,
+        }),
+      ),
+    );
+  }
+
+  if (addressesInAddress && !addressesInName) {
+    // Best case scenario but name might be faulty
+    if (addressesInAddress.length === 1) {
+      const [foundAddress] = addressesInAddress;
+      addressesFound.push({
+        address: foundAddress,
+        name,
+      });
+    } else {
+      // ignore name
+      addressesFound.push(
+        ...addressesInAddress.map(
+          (foundAddress): MSEmailAddress => ({
+            address: foundAddress,
+            name: foundAddress,
+          }),
+        ),
+      );
+    }
+  }
+
+  if (!addressesInAddress && addressesInName) {
+    addressesFound.push(
+      ...addressesInName.map(
+        (foundAddress): MSEmailAddress => ({
+          address: foundAddress,
+          name: foundAddress,
+        }),
+      ),
+    );
+  }
+
+  if (!addressesInAddress && !addressesInName) {
+    console.log(
+      `No address found in: ${JSON.stringify({
+        address,
+        name,
+      })}`,
+    );
+  }
+
+  // Leading single quotes are probably a mistake, this could result in false
+  // negatives but it's a rare case an address would actually start with a
+  // single quote
+  const withoutLeadingQuote = addressesFound.filter(
+    (foundAddress) => !foundAddress.address.startsWith("'"),
+  );
+
+  const withoutDupes = uniq(withoutLeadingQuote);
+
+  return withoutDupes;
+};
+
+const getDomainFromEmailAddress = (address: string): string => {
   const afterAt = address.split('@')[1];
-  if (afterAt === undefined) return null;
   const splitDot = afterAt.split('.');
   const domain = `${splitDot[splitDot.length - 2]}.${
     splitDot[splitDot.length - 1]
@@ -140,13 +255,13 @@ const getDomainFromEmailAddress = (address) => {
   return domain.toLowerCase();
 };
 
-const processSender = (message, messageEntity) => {
-  const fromEmailAddressAddress = _.get(
-    message,
-    'from.emailAddress.address',
-    null,
+const processSender = (message: { from: MSPerson }, messageEntity: Entity) => {
+  const foundAddresses = getAddressAndNameFromMSEmailAddress(
+    message.from.emailAddress,
   );
-  if (fromEmailAddressAddress === null) {
+
+  if (foundAddresses.length != 1) {
+    console.log(`Could not process sender for message: `, message);
     return {
       fromEmailAddressEntity: null,
       fromDomainEntity: null,
@@ -154,30 +269,24 @@ const processSender = (message, messageEntity) => {
       emailAddressBelongsToDomainRelationship: null,
     };
   }
-  const fromEmailAddressName = _.get(
-    message,
-    'from.emailAddress.name',
-    'NOT DEFINED',
-  );
+
+  const [foundAddress] = foundAddresses;
+
   const fromEmailAddressEntity = createEmailAddressEntity(
-    fromEmailAddressAddress,
-    fromEmailAddressName,
+    foundAddress.address,
+    foundAddress.name,
   );
 
-  const fromDomain = getDomainFromEmailAddress(fromEmailAddressAddress);
-  const fromDomainEntity =
-    fromDomain !== null ? createDomainEntity(fromDomain) : null;
+  const fromDomain = getDomainFromEmailAddress(foundAddress.address);
+  const fromDomainEntity = createDomainEntity(fromDomain);
 
-  const emailAddressBelongsToDomainRelationship =
-    fromDomainEntity !== null
-      ? createDirectRelationship({
-          fromKey: fromEmailAddressEntity._key,
-          fromType: EMAIL_ADDRESS_ENTITY_TYPE,
-          _type: RelationshipClass.BELONGS_TO,
-          toKey: fromDomainEntity._key,
-          toType: DOMAIN_ENTITY_TYPE,
-        })
-      : null;
+  const emailAddressBelongsToDomainRelationship = createDirectRelationship({
+    fromKey: fromEmailAddressEntity._key,
+    fromType: EMAIL_ADDRESS_ENTITY_TYPE,
+    _type: RelationshipClass.BELONGS_TO,
+    toKey: fromDomainEntity._key,
+    toType: DOMAIN_ENTITY_TYPE,
+  });
 
   // MESSAGE_SENT_FROM_EMAIL_ADDRESS_RELATIONSHIP
   const messageSentFromEmailAddressRelationship = createDirectRelationship({
@@ -196,64 +305,72 @@ const processSender = (message, messageEntity) => {
   };
 };
 
-const processRecipients = (message, messageEntity) => {
-  const toEmailAddressEntities: any = [];
-  const toDomainEntities: any = [];
-  const messageSentToEmailAddressRelationships: any = [];
-  const emailAddressBelongsToDomainRelationships: any = [];
+const processRecipients = (
+  message: { toRecipients: readonly MSPerson[] },
+  messageEntity: Entity,
+  recipientType: 'to' | 'cc',
+) => {
+  const toEmailAddressEntities: Entity[] = [];
+  const toDomainEntities: Entity[] = [];
+  const messageSentToEmailAddressRelationships: ExplicitRelationship[] = [];
+  const emailAddressBelongsToDomainRelationships: ExplicitRelationship[] = [];
 
   for (const toEmailRecipient of message.toRecipients) {
-    const toEmailAddressAddress = _.get(
-      toEmailRecipient,
-      'emailAddress.address',
-      null,
+    const foundAddresses = getAddressAndNameFromMSEmailAddress(
+      toEmailRecipient.emailAddress,
     );
 
-    if (!toEmailAddressAddress) continue;
+    if (foundAddresses.length === 0) continue;
 
-    const toEmailAddressName = _.get(
-      toEmailRecipient,
-      'emailAddress.name',
-      'NOT DEFINED',
-    );
-    const toEmailAddressEntity = createEmailAddressEntity(
-      toEmailAddressAddress,
-      toEmailAddressName,
+    const obtainedToEmailAddressEntities = foundAddresses.map((foundAddress) =>
+      createEmailAddressEntity(foundAddress.address, foundAddress.name),
     );
 
-    const toDomain = getDomainFromEmailAddress(toEmailAddressAddress);
-    const toDomainEntity =
-      toDomain !== null ? createDomainEntity(toDomain) : null;
+    const toDomains = foundAddresses.map((foundAddress) =>
+      getDomainFromEmailAddress(foundAddress.address),
+    );
 
-    const emailAddressBelongsToDomainRelationship =
-      toDomainEntity !== null
-        ? createDirectRelationship({
-            fromKey: toEmailAddressEntity._key,
-            fromType: EMAIL_ADDRESS_ENTITY_TYPE,
-            _type: RelationshipClass.BELONGS_TO,
-            toKey: toDomainEntity._key,
-            toType: DOMAIN_ENTITY_TYPE,
-          })
-        : null;
+    const obtainedToDomainEntities = toDomains.map((toDomain) =>
+      createDomainEntity(toDomain),
+    );
+
+    const obtainedEmailAddressBelongsToDomainRelationship = zip(
+      obtainedToEmailAddressEntities,
+      obtainedToDomainEntities,
+    ).map(([toEmailAddressEntity, toDomainEntity]) =>
+      createDirectRelationship({
+        fromKey: toEmailAddressEntity!._key,
+        fromType: EMAIL_ADDRESS_ENTITY_TYPE,
+        _type: RelationshipClass.BELONGS_TO,
+        toKey: toDomainEntity!._key,
+        toType: DOMAIN_ENTITY_TYPE,
+      }),
+    );
 
     // MESSAGE_SENT_TO_EMAIL_ADDRESS_RELATIONSHIP
-    const messageSentToEmailAddressRelationship = createDirectRelationship({
-      fromKey: messageEntity._key,
-      fromType: MESSAGE_ENTITY_TYPE,
-      _type: RelationshipClass.SENT_TO,
-      toKey: toEmailAddressEntity._key,
-      toType: EMAIL_ADDRESS_ENTITY_TYPE,
-    });
-
-    toEmailAddressEntities.push(toEmailAddressEntity);
-    if (toDomainEntity !== null) toDomainEntities.push(toDomainEntity);
-    messageSentToEmailAddressRelationships.push(
-      messageSentToEmailAddressRelationship,
-    );
-    if (emailAddressBelongsToDomainRelationship !== null)
-      emailAddressBelongsToDomainRelationships.push(
-        emailAddressBelongsToDomainRelationship,
+    const obtainedMessageSentToEmailAddressRelationships =
+      obtainedToEmailAddressEntities.map((toEmailAddressEntity) =>
+        createDirectRelationship({
+          fromKey: messageEntity._key,
+          fromType: MESSAGE_ENTITY_TYPE,
+          _type:
+            recipientType === 'cc'
+              ? RelationshipClass.CC_TO
+              : RelationshipClass.SENT_TO,
+          toKey: toEmailAddressEntity._key,
+          toType: EMAIL_ADDRESS_ENTITY_TYPE,
+        }),
       );
+
+    toEmailAddressEntities.push(...obtainedToEmailAddressEntities);
+    toDomainEntities.push(...obtainedToDomainEntities);
+    messageSentToEmailAddressRelationships.push(
+      ...obtainedMessageSentToEmailAddressRelationships,
+    );
+
+    emailAddressBelongsToDomainRelationships.push(
+      ...obtainedEmailAddressBelongsToDomainRelationship,
+    );
   }
 
   return {
@@ -264,78 +381,10 @@ const processRecipients = (message, messageEntity) => {
   };
 };
 
-const processCCs = (message, messageEntity) => {
-  const ccEmailAddressEntities: any = [];
-  const ccDomainEntities: any = [];
-  const messageSentCCEmailAddressRelationships: any = [];
-  const emailAddressBelongsToDomainRelationships: any = [];
-
-  for (const ccEmailRecipient of message.ccRecipients) {
-    const ccEmailAddressAddress = _.get(
-      ccEmailRecipient,
-      'emailAddress.address',
-      null,
-    );
-
-    if (!ccEmailAddressAddress) continue;
-
-    const ccEmailAddressName = _.get(
-      ccEmailRecipient,
-      'emailAddress.name',
-      'NOT DEFINED',
-    );
-    const ccEmailAddressEntity = createEmailAddressEntity(
-      ccEmailAddressAddress,
-      ccEmailAddressName,
-    );
-
-    const ccDomain = getDomainFromEmailAddress(ccEmailAddressAddress);
-    const ccDomainEntity =
-      ccDomain !== null ? createDomainEntity(ccDomain) : null;
-
-    const emailAddressBelongsToDomainRelationship =
-      ccDomainEntity !== null
-        ? createDirectRelationship({
-            fromKey: ccEmailAddressEntity._key,
-            fromType: EMAIL_ADDRESS_ENTITY_TYPE,
-            _type: RelationshipClass.BELONGS_TO,
-            toKey: ccDomainEntity._key,
-            toType: DOMAIN_ENTITY_TYPE,
-          })
-        : null;
-
-    // MESSAGE_SENT_TO_EMAIL_ADDRESS_RELATIONSHIP
-    const messageSentCCEmailAddressRelationship = createDirectRelationship({
-      fromKey: messageEntity._key,
-      fromType: MESSAGE_ENTITY_TYPE,
-      _type: RelationshipClass.CC_TO,
-      toKey: ccEmailAddressEntity._key,
-      toType: EMAIL_ADDRESS_ENTITY_TYPE,
-    });
-
-    ccEmailAddressEntities.push(ccEmailAddressEntity);
-    if (ccDomainEntity !== null) ccDomainEntities.push(ccDomainEntity);
-    messageSentCCEmailAddressRelationships.push(
-      messageSentCCEmailAddressRelationship,
-    );
-    if (emailAddressBelongsToDomainRelationship !== null)
-      emailAddressBelongsToDomainRelationships.push(
-        emailAddressBelongsToDomainRelationship,
-      );
-  }
-
-  return {
-    ccEmailAddressEntities,
-    ccDomainEntities,
-    messageSentCCEmailAddressRelationships,
-    emailAddressBelongsToDomainRelationships,
-  };
-};
-
 const storeEntities = async (entities, jobState: JobState) => {
   const uniqueEntities = _.uniqBy(entities, (e: Entity) => e._key);
 
-  const newEntities: any = [];
+  const newEntities: Entity[] = [];
   for (const entity of uniqueEntities) {
     const existingEntity = await jobState.hasKey(entity._key);
     if (!existingEntity) newEntities.push(entity);
@@ -347,10 +396,10 @@ const storeEntities = async (entities, jobState: JobState) => {
 const storeRelationships = async (relationships, jobState: JobState) => {
   const uniqueRelationships = _.uniqBy(
     relationships,
-    (r: Relationship) => r._key,
+    (r: ExplicitRelationship) => r._key,
   );
 
-  const newRelationships: any = [];
+  const newRelationships: ExplicitRelationship[] = [];
   for (const relationship of uniqueRelationships) {
     const existingRelationship = await jobState.hasKey(relationship._key);
     if (!existingRelationship) newRelationships.push(relationship);
